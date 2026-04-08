@@ -16,5 +16,5 @@ A terminal-based banking simulation written in C.
 - data/ : runtime data storage (not tracked)
 
 ## How to Run
-gcc miniproject.c -o bank
+gcc src/miniproject.c -o bank
 ./bank
