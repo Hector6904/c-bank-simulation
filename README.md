@@ -18,20 +18,27 @@ A modular banking system written in C that simulates real-world banking operatio
 ---
 
 ## 📁 Project Structure
+
+```
+
 c-bank-simulation/
 ├── src/
-│ ├── main.c # Entry point
-│ ├── account.c # Core banking logic
-│ ├── transaction.c # Transaction handling
-│ ├── file.c # File I/O (save/load)
-│ └── utils.c # Helpers (hashing, random generation)
+│   ├── main.c          # Entry point
+│   ├── account.c       # Core banking logic
+│   ├── transaction.c   # Transaction handling
+│   ├── file.c          # File I/O (save/load)
+│   └── utils.c         # Helpers (hashing, random generation)
 │
 ├── include/
-│ ├── bank.h
-│ ├── account.h
-│ ├── transaction.h
-│ ├── file.h
-│ └── utils.h
+│   ├── bank.h
+│   ├── account.h
+│   ├── transaction.h
+│   ├── file.h
+│   └── utils.h
+
+```
+```
+
 
 ---
 
