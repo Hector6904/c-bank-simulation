@@ -2,26 +2,35 @@
 #include "bank.h"
 #include "account.h"
 #include "file.h"
+#include "utils.h"
+#include "ui.h"
 
-struct Account bank[MAX];
-int accCount = 0;
+/* Single global bank instance — defined here, declared extern in bank.h */
+struct Bank g_bank = {0};
 
-int main() {
+int main(void) {
     load();
 
     int c;
-
     do {
-        printf("\n1. Create Account\n2. Login\n3. Exit\n");
-        scanf("%d", &c);
+        print_main_menu();
+
+        if (!read_int(&c)) {
+            print_error("Please enter a valid number.");
+            continue;
+        }
 
         switch (c) {
             case 1: create(); break;
             case 2: login();  break;
-            case 3: printf("Exiting...\n"); break;
-            default: printf("Invalid choice\n");
+            case 3:
+                print_banner();
+                printf(SYM_INFO "  Thank you for banking with " BOLD CYAN "Nova Bank" RESET ".\n");
+                printf(DIM      "  Have a great day!\n\n" RESET);
+                break;
+            default:
+                print_error("Invalid choice. Please enter 1, 2, or 3.");
         }
-
     } while (c != 3);
 
     save();
