@@ -5,19 +5,19 @@
 #include <openssl/rand.h>
 #include "utils.h"
 #include "ui.h"
+#include <termios.h>
+#include <unistd.h>
 
-/* ── Safe integer input ─────────────────────────────────────────────────────
- * Reads a line, parses it as int.
- * Returns 1 on success, 0 on bad input (non-numeric / overflow).
- * This replaces every raw scanf("%d") in the project.
- * -------------------------------------------------------------------------- */
+/* ── Safe integer input ─────────────────────────────────────────────────── */
 int read_int(int *out) {
     char buf[32];
     if (!fgets(buf, sizeof(buf), stdin)) return 0;
+
     char *end;
     long val = strtol(buf, &end, 10);
-    /* end must point to '\n' or '\0', not a letter */
+
     if (end == buf || (*end != '\n' && *end != '\0')) return 0;
+
     *out = (int)val;
     return 1;
 }
@@ -26,21 +26,64 @@ int read_int(int *out) {
 int read_double(double *out) {
     char buf[32];
     if (!fgets(buf, sizeof(buf), stdin)) return 0;
+
     char *end;
     double val = strtod(buf, &end);
+
     if (end == buf || (*end != '\n' && *end != '\0')) return 0;
+
     *out = val;
     return 1;
 }
 
-/* ── PIN reader with validation ─────────────────────────────────────────────
- * Returns the 4-digit PIN, or -1 on invalid input.
- * -------------------------------------------------------------------------- */
+/* ── PIN reader with validation ─────────────────────────────────────────── */
 int maskedPIN(void) {
-    int pin;
-    if (!read_int(&pin)) return -1;
-    if (pin < PIN_MIN || pin > PIN_MAX) return -1;
-    return pin;
+    struct termios old, new;
+
+    /* PRINT PROMPT FIRST */
+    printf("Enter 4-digit PIN: ");
+    fflush(stdout);
+
+    tcgetattr(STDIN_FILENO, &old);
+    new = old;
+
+    new.c_lflag &= ~(ECHO | ICANON);
+    new.c_cc[VMIN] = 1;
+    new.c_cc[VTIME] = 0;
+
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &new);
+
+    char digits[4];
+    int count = 0;
+
+    while (count < 4) {
+        char c;
+        read(STDIN_FILENO, &c, 1);
+
+        /* Backspace */
+        if ((c == 127 || c == '\b') && count > 0) {
+            count--;
+            printf("\b \b");
+            fflush(stdout);
+            continue;
+        }
+
+        /* Only digits */
+        if (c < '0' || c > '9') continue;
+
+        digits[count++] = c;
+        printf("*");
+        fflush(stdout);
+    }
+
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &old);
+    printf("\n");
+
+    int pin = 0;
+    for (int k = 0; k < 4; k++)
+        pin = pin * 10 + (digits[k] - '0');
+
+    return (pin >= 1000 && pin <= 9999) ? pin : -1;
 }
 
 /* ── Cryptographically secure N-digit number ────────────────────────────── */
@@ -57,14 +100,18 @@ long long genNum(int d) {
 
     long long n = (long long)(r % (unsigned long long)mod);
     long long minVal = mod / 10;
+
     if (n < minVal) n += minVal;
+
     return n;
 }
 
 /* ── SHA-256 PIN hash with salt ─────────────────────────────────────────── */
 void hashPIN(int pin, unsigned char *salt, unsigned char *output) {
-    unsigned char input[20];          /* 16-byte salt + 4-byte pin */
+    unsigned char input[20];  // 16 salt + 4 pin
+
     memcpy(input, salt, 16);
     memcpy(input + 16, &pin, sizeof(int));
+
     SHA256(input, 16 + sizeof(int), output);
 }

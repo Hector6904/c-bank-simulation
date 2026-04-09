@@ -311,23 +311,45 @@ void create(void) {
     }
 
     struct Account *a = &bank[accCount];
-    memset(a, 0, sizeof(struct Account));   /* zero all fields first */
+    memset(a, 0, sizeof(struct Account));
 
     print_section("OPEN NEW ACCOUNT");
-    printf("\n  Full Name        : ");
+    printf("\n  Full Name : ");
     scanf(" %49[^\n]", a->name);
-    /* flush */
     int ch; while ((ch = getchar()) != '\n' && ch != EOF);
 
-    /* PIN with validation loop */
+    /* PIN — loop until valid matching pair entered */
     int pin = -1;
-    for (int tries = 0; tries < 3 && pin == -1; tries++) {
-        printf("  Set 4-digit PIN  : ");
-        pin = maskedPIN();
-        if (pin == -1)
-            print_error("PIN must be exactly 4 digits (1000-9999). Try again.");
+    for (int tries = 0; tries < 3; tries++) {
+        printf("  Enter PIN     : ");
+        int p = maskedPIN();
+
+        if (p == -1) {
+            print_error("PIN must be exactly 4 digits. Try again.");
+            continue;
+        }
+
+        printf("  Confirm PIN   : ");
+        int confirm = maskedPIN();
+
+        if (confirm == -1) {
+            print_error("Invalid confirm PIN. Try again.");
+            continue;
+        }
+
+        if (p != confirm) {
+            print_error("PINs do not match. Try again.");
+            continue;
+        }
+
+        pin = p;   /* success — set the outer variable */
+        break;
     }
-    if (pin == -1) { print_error("Could not set PIN. Account creation aborted."); return; }
+
+    if (pin == -1) {
+        print_error("Could not set PIN after 3 attempts. Account creation aborted.");
+        return;
+    }
 
     if (RAND_bytes(a->salt, 16) != 1) {
         print_error("System error: secure random generation failed.");
@@ -349,7 +371,6 @@ void create(void) {
     accCount++;
     save();
 }
-
 /* ═══════════════════════════════════════════════════════════
    HOME / DASHBOARD
    ═══════════════════════════════════════════════════════════ */

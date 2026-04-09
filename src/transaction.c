@@ -3,21 +3,26 @@
 #include "bank.h"
 #include "transaction.h"
 #include "ui.h"
+#include <time.h> 
 
 /* ── Add a transaction entry ──────────────────────────────────────────────── */
 void addTransaction(int i, const char *msg) {
     if (bank[i].txCount < MAX_TX) {
-        strncpy(bank[i].transactions[bank[i].txCount], msg, TX_MSG_LEN - 1);
-        bank[i].transactions[bank[i].txCount][TX_MSG_LEN - 1] = '\0';
+        time_t now = time(NULL);
+        struct tm *t = localtime(&now);
+
+        char timestamp[30];
+        strftime(timestamp, sizeof(timestamp), "%d %b %Y | %H:%M", t);
+
+        char finalMsg[100];
+        snprintf(finalMsg, sizeof(finalMsg), "[%s] %s", timestamp, msg);
+
+        strncpy(bank[i].transactions[bank[i].txCount], finalMsg, 99);
+        bank[i].transactions[bank[i].txCount][99] = '\0';
+
         bank[i].txCount++;
     } else {
-        print_warning("Transaction log full. Oldest entry overwritten.");
-        /* Shift entries left to make room — circular-buffer style */
-        memmove(bank[i].transactions[0],
-                bank[i].transactions[1],
-                (MAX_TX - 1) * TX_MSG_LEN);
-        strncpy(bank[i].transactions[MAX_TX - 1], msg, TX_MSG_LEN - 1);
-        bank[i].transactions[MAX_TX - 1][TX_MSG_LEN - 1] = '\0';
+        printf("Warning: Transaction log full.\n");
     }
 }
 
