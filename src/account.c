@@ -114,40 +114,46 @@ void withdraw(int i) {
 
 /* ═══════════════════════════════════════════════════════════
    TRANSFER
-   New: shows receiver name BEFORE confirming amount,
-        asks for confirmation before committing.
+   Shows receiver name before confirming amount,
+   asks for confirmation before committing.
    ═══════════════════════════════════════════════════════════ */
 void transfer(int i) {
     print_section("TRANSFER MONEY");
-    printf("\n  Enter Receiver Account No  : ");
 
-    long long target;
-    if (!read_int(NULL)) {
-        /* read_int with NULL is not right — use dedicated read */
-        char buf[32];
-        fgets(buf, sizeof(buf), stdin);
-        target = atoll(buf);
-    } else {
-        /* fallback */
-        scanf("%lld", &target);
+    char tbuf[32];
+    printf("\n  Enter Receiver Account No  : ");
+    fflush(stdout);
+    if (!fgets(tbuf, sizeof(tbuf), stdin)) {
+        print_error("Input error.");
+        return;
+    }
+
+    long long target = atoll(tbuf);
+    if (target <= 0) {
+        print_error("Invalid account number. Must be a positive number.");
+        return;
     }
 
     int j = find(target);
-    if (j == -1) { print_error("Account not found."); return; }
+    if (j == -1) { print_error("Account not found. Please verify the account number."); return; }
     if (j == i)  { print_error("Cannot transfer to your own account."); return; }
 
     printf("  Sending to         : " BOLD CYAN "%s\n" RESET, bank[j].name);
     printf("  Enter amount (Rs.) : ");
 
     long long amt = read_amount();
-    if (amt <= 0)              { print_error("Invalid amount.");       return; }
+    if (amt <= 0)              { print_error("Invalid amount.");        return; }
     if (amt > bank[i].balance) { print_error("Insufficient balance."); return; }
 
-    /* ── Confirmation step (new in v2) ─────────────────────── */
+    /* confirmation step */
     printf("\n" YELLOW "  Confirm: Send Rs. %.2f to %s? [y/N]: " RESET,
            amt / 100.0, bank[j].name);
+    fflush(stdout);
     char confirm[4];
-    fgets(confirm, sizeof(confirm), stdin);
+    if (!fgets(confirm, sizeof(confirm), stdin)) {
+        print_error("Input error.");
+        return;
+    }
     if (confirm[0] != 'y' && confirm[0] != 'Y') {
         print_info("Transfer cancelled.");
         return;
@@ -156,20 +162,15 @@ void transfer(int i) {
     bank[i].balance -= amt;
     bank[j].balance += amt;
 
-    char msg1[TX_MSG_LEN], msg2[TX_MSG_LEN];
-    snprintf(msg1, sizeof(msg1), "Sent Rs. %.2f to Acc %lld (%s)",
-             amt / 100.0, target, bank[j].name);
-    snprintf(msg2, sizeof(msg2), "Received Rs. %.2f from Acc %lld (%s)",
-             amt / 100.0, bank[i].accNo, bank[i].name);
+    char msg1[TX_MSG_LEN], msg2[TX_MSG_LEN], notice[TX_MSG_LEN];
+    snprintf(msg1,   sizeof(msg1),   "Sent Rs. %.2f to Acc %lld (%s)",      amt / 100.0, target,         bank[j].name);
+    snprintf(msg2,   sizeof(msg2),   "Received Rs. %.2f from Acc %lld (%s)", amt / 100.0, bank[i].accNo, bank[i].name);
+    snprintf(notice, sizeof(notice), "Rs. %.2f transferred to %s successfully!", amt / 100.0, bank[j].name);
+
     addTransaction(i, msg1);
     addTransaction(j, msg2);
-
-    char notice[TX_MSG_LEN];
-    snprintf(notice, sizeof(notice),
-             "Rs. %.2f transferred to %s successfully!", amt / 100.0, bank[j].name);
     print_success(notice);
 }
-
 /* ═══════════════════════════════════════════════════════════
    DEBIT CARD SWIPE
    ═══════════════════════════════════════════════════════════ */
