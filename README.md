@@ -30,7 +30,7 @@ Nova Bank simulates core banking operations — account management, transactions
 
 ---
 
-## 🧭 Overview
+##  Overview
 
 Nova Bank is designed to reflect real-world banking concepts using low-level programming in C. It emphasizes:
 
@@ -42,28 +42,28 @@ Nova Bank is designed to reflect real-world banking concepts using low-level pro
 
 ---
 
-## ✨ Features
+##  Features
 
-### 🔐 Account Management
+###  Account Management
 - Create accounts with a full name and a user-set 4-digit PIN
 - PIN confirmation required at creation; up to 3 attempts allowed
 - Secure login via account number and PIN
 - Account automatically **locked** after 3 consecutive failed login attempts
 
-### 💸 Financial Operations
+###  Financial Operations
 - Deposit and withdraw funds with real-time balance feedback
 - Large withdrawal warning triggered for amounts exceeding **Rs. 20,000**
 - Transfer money between accounts with receiver name preview and a confirmation prompt before committing
 - Debit card payments verified against the account's 16-digit card number
 - Credit card payments checked against available credit in real time
 
-### 💳 Credit System
+###  Credit System
 - Default credit limit of **Rs. 50,000** per account
 - Credit usage tracked separately from account balance
 - Transactions declined automatically if they exceed available credit
 - Partial credit bill payments supported — pay any amount up to the outstanding balance
 
-### 📈 Interest Calculation
+### Interest Calculation
 
 Interest is applied automatically on login, once every 30 days, using a three-tier rate system:
 
@@ -73,18 +73,18 @@ Interest is applied automatically on login, once every 30 days, using a three-ti
 | Rs. 10,000 – Rs. 50,000 | 2% |
 | Above Rs. 50,000 | 3% |
 
-### 🧾 Transaction Tracking
+###  Transaction Tracking
 - Every operation is logged with a **timestamp** (`DD Mon YYYY | HH:MM`) and a description
 - Full transaction history viewable in a formatted, colour-coded table
 - Mini statement shows the **last 5 transactions** at a glance
 - Deposits and credits shown in green; withdrawals and payments in red
 
-### 💾 Data Persistence
+###  Data Persistence
 - All data stored in `bank.dat` as a binary file
 - Writes go to `bank.tmp` first, then atomically renamed to `bank.dat`
 - Corrupt or out-of-range account counts detected on load; system starts fresh rather than crashing
 
-### 🔒 Security
+###  Security
 - PINs hashed with **SHA-256 + a 16-byte cryptographically random salt** (via OpenSSL)
 - No plain-text credentials written to disk at any point
 - Card numbers generated using `RAND_bytes` from OpenSSL — cryptographically secure
@@ -97,7 +97,7 @@ Interest is applied automatically on login, once every 30 days, using a three-ti
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 nova-bank/
@@ -121,7 +121,7 @@ nova-bank/
 
 ---
 
-## 🏗️ Design Highlights
+##  Design Highlights
 
 ### Precision-Safe Currency Handling
 
@@ -172,7 +172,7 @@ The interface uses ANSI escape codes defined in `ui.h` for colour, bold, and dim
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -191,7 +191,7 @@ brew install openssl
 
 ---
 
-## ⚙️ Compilation & Execution
+##  Compilation & Execution
 
 ### Compile
 
@@ -209,7 +209,7 @@ gcc src/*.c -o bank -lssl -lcrypto
 
 ---
 
-## 🛠️ Debug Utility
+##  Debug Utility
 
 `debug.c` is a standalone tool that reads `bank.dat` and prints all stored account data in a human-readable format — including name, account number, balance, salt, and PIN hash.
 
@@ -229,7 +229,7 @@ gcc debug.c -o debug
 
 ---
 
-## 📚 Concepts Demonstrated
+##  Concepts Demonstrated
 
 | Concept | Implementation |
 |---|---|
@@ -244,7 +244,7 @@ gcc debug.c -o debug
 
 ---
 
-## 📄 License
+##  License
 
 This project is intended for **educational purposes** and may be freely modified or extended.
 
